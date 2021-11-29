@@ -17,7 +17,7 @@ struct Restriccion
 
 vector<vector <int>> Read_Var(){ // Las variables son guardas en un vector de vectores, donde hay 2 elementos, uno de ellos es la variable y el otro el dominio asignado
     ifstream inFile;
-    inFile.open("/home/ladros/Programs/Proyecto-IA-ent2/CELAR/scen01/VAR.TXT");
+    inFile.open("/home/ladros/Programs/Proyecto-IA-ent2/CELAR/scen01/VAR.TXT"); // se debe especificar la ruta de Var.txt
     int vari,dom;
     if (!inFile)
     {
@@ -38,7 +38,7 @@ vector<vector <int>> Read_Var(){ // Las variables son guardas en un vector de ve
 
 vector<vector<int>> Read_Dom(){ //El dominio se guarda en una lista donde cada indice es el dominio al que corresponde y los elementos son un vector con las posibles frecuencias
     ifstream inFil;
-    inFil.open("/home/ladros/Programs/Proyecto-IA-ent2/CELAR/scen01/DOM.TXT");
+    inFil.open("/home/ladros/Programs/Proyecto-IA-ent2/CELAR/scen01/DOM.TXT"); // se debe especificar la ruta de Dom.txt
 
     if (!inFil)
     {
@@ -76,7 +76,7 @@ vector<vector<int>> Read_Dom(){ //El dominio se guarda en una lista donde cada i
 
 vector<struct Restriccion> Read_Rest(){
     ifstream inDat;
-    inDat.open("/home/ladros/Programs/Proyecto-IA-ent2/CELAR/scen01/CTR.TXT");
+    inDat.open("/home/ladros/Programs/Proyecto-IA-ent2/CELAR/scen01/CTR.TXT"); // se debe especificar la ruta de CTR.txt
     if (!inDat)
     {
         cout << "Fallo abrir archivo"<<endl;
