@@ -144,15 +144,6 @@ vector<vector<int>> init_sol(vector<int> FrecuenciasOrdenadas,vector<vector<int>
         put_1 = false;  
         
     }
-
-    for(vector<int> m: Frec_Asignada){
-        cout<<"[";
-        for(int n: m){
-            cout<<" "<<n<<" ";
-        }
-        cout<<"]"<<endl;
-    }
-
     return Frec_Asignada;
 }
 
@@ -173,6 +164,29 @@ vector<int> Frec_Orde(vector<vector<int>> Dom){ //Ordena la lista de frecuencias
     return Frec;
 }
 
+int func_objetivo(vector<vector<int>> matriz){
+    int value = 0;
+    for(int i = 0; i<matriz[0].size();i++){
+        for(vector<int> antena: matriz){
+            if( antena[i] == 1 ){
+                value += 1;
+                break;
+            }
+        }
+    }
+    return value;
+}
+
+
+
+int funcion_evaluacion(vector<vector<int>> matriz){
+
+}
+
+int SimulatedAnneling(vector<vector<int>> Sol_Inicial){
+    int Temp_init = 100; //dejamos temperatura inicial 100 
+    int IterMax = 100;
+}
 
 int main(){
     
@@ -180,6 +194,7 @@ int main(){
     vector<vector<int>> Dom = Read_Dom();
     vector<struct Restriccion> Rest = Read_Rest();
     vector<int> FrecuenciasOrdenadas = Frec_Orde(Dom);
-    init_sol(FrecuenciasOrdenadas,Dom_Asig_Var,Dom);
+    vector<vector<int>> sol_inicial = init_sol(FrecuenciasOrdenadas,Dom_Asig_Var,Dom);
+    cout<<func_objetivo(sol_inicial)<<endl;
     return 0;
 }
