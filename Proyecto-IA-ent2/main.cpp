@@ -164,7 +164,7 @@ vector<int> Frec_Orde(vector<vector<int>> Dom){ //Ordena la lista de frecuencias
     return Frec;
 }
 
-int func_objetivo(vector<vector<int>> matriz){
+int func_objetivo(vector<vector<int>> matriz){ //la funcion objetivo entrega la cantidad de frecuencias que fueron asignadas al menos a 1 antena
     int value = 0;
     for(int i = 0; i<matriz[0].size();i++){
         for(vector<int> antena: matriz){
@@ -179,8 +179,33 @@ int func_objetivo(vector<vector<int>> matriz){
 
 
 
-int funcion_evaluacion(vector<vector<int>> matriz){
+int funcion_evaluacion(vector<vector<int>> matriz, vector<struct Restriccion> Rest,vector<int> FrecuenciasOrdenadas){
+    int Objetivo_value = func_objetivo(matriz);
+    int RestFails = 0;
 
+    for(struct Restriccion Cuerpo: Rest){ // obtengo la cantidad de restricciones violadas 
+        vector <int> antena1 = matriz[Cuerpo.val1 - 1];
+        vector <int> antena2 = matriz[Cuerpo.val2 - 1];
+
+        std::vector<int>::iterator pon1 = find(antena1.begin(), antena1.end(), 1);
+        std::vector<int>::iterator pon2 = find(antena2.begin(), antena2.end(), 1);
+
+        int indexFrec1 = distance(antena1.begin(),pon1);
+        int indexFrec2 = distance(antena2.begin(),pon2);
+
+        int distancia = abs(FrecuenciasOrdenadas[indexFrec1] - FrecuenciasOrdenadas[indexFrec2]);    
+    
+        if(Cuerpo.operacion == "="){
+            if (distancia != Cuerpo.limit) RestFails += 1;
+    
+        }else if (Cuerpo.operacion == ">")
+        {
+            if(distancia < Cuerpo.limit) RestFails += 1;
+        }
+    }
+
+    int final = Objetivo_value + 4*RestFails;
+    return final;
 }
 
 int SimulatedAnneling(vector<vector<int>> Sol_Inicial){
@@ -195,6 +220,6 @@ int main(){
     vector<struct Restriccion> Rest = Read_Rest();
     vector<int> FrecuenciasOrdenadas = Frec_Orde(Dom);
     vector<vector<int>> sol_inicial = init_sol(FrecuenciasOrdenadas,Dom_Asig_Var,Dom);
-    cout<<func_objetivo(sol_inicial)<<endl;
+    cout<<funcion_evaluacion(sol_inicial,Rest,FrecuenciasOrdenadas)<<endl;
     return 0;
 }
