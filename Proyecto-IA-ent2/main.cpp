@@ -6,55 +6,58 @@
 #include<time.h>
 #include <cmath>
 
-using namespace std; 
+
 
 struct Restriccion
 {
     int val1;
     int val2;
-    string operacion; 
+    std::string operacion; 
     int limit; 
 };
 
 
 
-vector<vector <int>> Read_Var(){ // Las variables son guardas en un vector de vectores, donde hay 2 elementos, uno de ellos es la variable y el otro el dominio asignado
-    ifstream inFile;
-    string nameFile;
-    cout<< "Ingrese Nombre del archivo de variables (ejemplo VAR1.TXT): ";
-    cin>>nameFile;
+std::vector<std::vector <int>> Read_Var(){ // Las variables son guardas en un vector de vectores, donde hay 2 elementos, uno de ellos es la variable y el otro el dominio asignado
+    std::ifstream inFile;
+    std::string nameFile;
+    std::cout<< "Ingrese Nombre del archivo de variables (ejemplo VAR1.TXT): ";
+    std::cin>>nameFile;
     inFile.open(nameFile); // se debe especificar la ruta de Var.txt
     int vari,dom;
     if (!inFile)
     {
-        cout << "Fallo abrir archivo"<<endl;
+        std::cout << "Fallo abrir archivo"<<std::endl;
         exit(1);
     }
-    vector<vector<int>> variables_list;
+    int tru_index = 0;
+    std::vector<std::vector<int>> variables_list;
     while (inFile >> vari >> dom)
     {   
-        vector<int> par = {0,0};
+        std::vector<int> par = {0,0,0};
         par[0] = vari; 
-        par[1] = dom; 
+        par[1] = dom;
+        par[2] = tru_index; 
         variables_list.push_back(par);
+        tru_index+=1;
     }
     inFile.close();
     return variables_list;
 }
 
-vector<vector<int>> Read_Dom(){ //El dominio se guarda en una lista donde cada indice es el dominio al que corresponde y los elementos son un vector con las posibles frecuencias
-    ifstream inFil;
-    string nameFile;
-    cout<< "Ingrese Nombre del archivo de dominio (ejemplo DOM1.TXT): ";
-    cin>>nameFile;
+std::vector<std::vector<int>> Read_Dom(){ //El dominio se guarda en una lista donde cada indice es el dominio al que corresponde y los elementos son un vector con las posibles frecuencias
+    std::ifstream inFil;
+    std::string nameFile;
+    std::cout<< "Ingrese Nombre del archivo de dominio (ejemplo DOM1.TXT): ";
+    std::cin>>nameFile;
     inFil.open(nameFile); // se debe especificar la ruta de Dom.txt
 
     if (!inFil)
     {
-        cout << "Fallo abrir archivo"<<endl;
+        std::cout << "Fallo abrir archivo"<<std::endl;
         exit(1);
     }
-    vector<vector<int>> raw_values;
+    std::vector<std::vector<int>> raw_values;
     while (!inFil.eof())
     {
         int nDom;
@@ -67,7 +70,7 @@ vector<vector<int>> Read_Dom(){ //El dominio se guarda en una lista donde cada i
         }
         
         inFil >> cantF;
-        vector<int> Frec;
+        std::vector<int> Frec;
         for (int i = 0; i < cantF; i++)
         {
             int temp;
@@ -83,24 +86,24 @@ vector<vector<int>> Read_Dom(){ //El dominio se guarda en una lista donde cada i
     return raw_values; 
 }
 
-vector<struct Restriccion> Read_Rest(){
-    ifstream inDat;
-    string nameFile;
-    cout<< "Ingrese Nombre del archivo de restricciones (ejemplo CTR1.TXT): ";
-    cin>>nameFile;
+std::vector<struct Restriccion> Read_Rest(){
+    std::ifstream inDat;
+    std::string nameFile;
+    std::cout<< "Ingrese Nombre del archivo de restricciones (ejemplo CTR1.TXT): ";
+    std::cin>>nameFile;
     inDat.open(nameFile); // se debe especificar la ruta de CTR.txt
     if (!inDat)
     {
-        cout << "Fallo abrir archivo"<<endl;
+        std::cout << "Fallo abrir archivo"<<std::endl;
         exit(1);
     }
 
     int val1;
     int val2;
-    string ded; 
-    string operation;
+    std::string ded; 
+    std::string operation;
     int limit; 
-    vector<struct Restriccion> Rest;
+    std::vector<struct Restriccion> Rest;
     struct Restriccion esqueleto;
     while (inDat >> val1 >> val2 >> ded >> operation >> limit)
     {
@@ -117,11 +120,11 @@ vector<struct Restriccion> Read_Rest(){
 }
    
 
-vector<vector<int>> init_sol(vector<int> FrecuenciasOrdenadas,vector<vector<int>> Dom_Asig_Var,vector<vector<int>> Dom){
+std::vector<std::vector<int>> init_sol(std::vector<int> FrecuenciasOrdenadas,std::vector<std::vector<int>> Dom_Asig_Var,std::vector<std::vector<int>> Dom){
     int cant_Frecuencias = FrecuenciasOrdenadas.size();
     int cant_Variables = Dom_Asig_Var.size();
     
-    vector<vector<int>> Frec_Asignada(cant_Variables,vector<int> (cant_Frecuencias,0)); //Matriz que ve si la frecuencia fue asignada a cierta antena. [#antenas][#frec]
+    std::vector<std::vector<int>> Frec_Asignada(cant_Variables,std::vector<int> (cant_Frecuencias,0)); //Matriz que ve si la frecuencia fue asignada a cierta antena. [#antenas][#frec]
     
     srand(time(0));
 
@@ -129,8 +132,8 @@ vector<vector<int>> init_sol(vector<int> FrecuenciasOrdenadas,vector<vector<int>
         int dom_index_var = Dom_Asig_Var[n_antena][1];
         int eleccion = rand() % Dom[dom_index_var].size(); 
 
-        std::vector<int>::iterator lugar = find(Dom[dom_index_var].begin(), Dom[dom_index_var].end(), Dom[dom_index_var][eleccion]);
-        int indexFrec1 = distance(Dom[dom_index_var].begin(),lugar);
+        std::vector<int>::iterator lugar = find(FrecuenciasOrdenadas.begin(), FrecuenciasOrdenadas.end(), eleccion);
+        int indexFrec1 = distance(FrecuenciasOrdenadas.begin(),lugar);
 
         Frec_Asignada[n_antena][indexFrec1] = 1;
     }
@@ -147,10 +150,10 @@ vector<vector<int>> init_sol(vector<int> FrecuenciasOrdenadas,vector<vector<int>
     return Frec_Asignada;
 }
 
-vector<int> Frec_Orde(vector<vector<int>> Dom){ //Ordena la lista de frecuencias, asi se tiene claro que frecuencia va con que indice en la solucion
-    vector<int> Frec;
+std::vector<int> Frec_Orde(std::vector<std::vector<int>> Dom){ //Ordena la lista de frecuencias, asi se tiene claro que frecuencia va con que indice en la solucion
+    std::vector<int> Frec;
 
-    for (vector<int> i : Dom)
+    for (std::vector<int> i : Dom)
     {
         for(int l: i)
         {
@@ -164,10 +167,10 @@ vector<int> Frec_Orde(vector<vector<int>> Dom){ //Ordena la lista de frecuencias
     return Frec;
 }
 
-int func_objetivo(vector<vector<int>> matriz){ //la funcion objetivo entrega la cantidad de frecuencias que fueron asignadas al menos a 1 antena
+int func_objetivo(std::vector<std::vector<int>> matriz){ //la funcion objetivo entrega la cantidad de frecuencias que fueron asignadas al menos a 1 antena
     int value = 0;
     for(int i = 0; i<matriz[0].size();i++){
-        for(vector<int> antena: matriz){
+        for(std::vector<int> antena: matriz){
             if( antena[i] == 1 ){
                 value += 1;
                 break;
@@ -179,14 +182,23 @@ int func_objetivo(vector<vector<int>> matriz){ //la funcion objetivo entrega la 
 
 
 
-int funcion_evaluacion(vector<vector<int>> matriz, vector<struct Restriccion> Rest,vector<int> FrecuenciasOrdenadas){
+int funcion_evaluacion(std::vector<std::vector<int>> matriz, std::vector<struct Restriccion> Rest,std::vector<int> FrecuenciasOrdenadas,std::vector<std::vector<int>> Dom_Asig_Var){
     int Objetivo_value = func_objetivo(matriz);
     int RestFails = 0;
 
     for(struct Restriccion Cuerpo: Rest){ // obtengo la cantidad de restricciones violadas 
-        vector <int> antena1 = matriz[Cuerpo.val1 - 1];
-        vector <int> antena2 = matriz[Cuerpo.val2 - 1];
-
+        std::vector <int> antena1;
+        std::vector <int> antena2;
+        for(std::vector<int> datos: Dom_Asig_Var){
+            if(datos[0] == Cuerpo.val1){
+                antena1 = matriz[datos[2]];
+            }
+        }
+        for(std::vector<int> datos: Dom_Asig_Var){
+            if(datos[0] == Cuerpo.val2){
+                antena2 = matriz[datos[2]];
+            }
+        }
         std::vector<int>::iterator pon1 = find(antena1.begin(), antena1.end(), 1);
         std::vector<int>::iterator pon2 = find(antena2.begin(), antena2.end(), 1);
 
@@ -209,63 +221,62 @@ int funcion_evaluacion(vector<vector<int>> matriz, vector<struct Restriccion> Re
 }
 
 
-vector<int> posibles_cambios(int index_antena,int index_frecAsig,vector<vector<int>> Dom_Asig_Var,vector<vector<int>> Dom ,vector<int> FrecuenciasOrdenadas){
+std::vector<int> posibles_cambios(int index_antena,int index_frecAsig,std::vector<std::vector<int>> Dom_Asig_Var,std::vector<std::vector<int>> Dom ,std::vector<int> FrecuenciasOrdenadas){
 
-    vector<int> asignacion = Dom[Dom_Asig_Var[index_antena][1]];
+    std::vector<int> asignacion = Dom[Dom_Asig_Var[index_antena][1]];
 
-    vector<int> index_cambios; 
+    std::vector<int> index_cambios; 
     for(int values: asignacion){
         std::vector<int>::iterator pon = find(FrecuenciasOrdenadas.begin(), FrecuenciasOrdenadas.end(), values);
         int index_value = distance(FrecuenciasOrdenadas.begin(),pon);
         if(index_frecAsig == index_value) continue;
         else
         {
-            index_cambios.push_back(index_value);
+           index_cambios.push_back(index_value);
         }
         
     }
     return index_cambios;
 }
 
-vector<vector<int>> SimulatedAnneling(int T,int iter_max,float factor){
-    vector<vector<int>> Dom_Asig_Var = Read_Var();
-    vector<vector<int>> Dom = Read_Dom();
-    vector<struct Restriccion> Rest = Read_Rest();
-    vector<int> FrecuenciasOrdenadas = Frec_Orde(Dom);
-    vector<vector<int>> sol_act = init_sol(FrecuenciasOrdenadas,Dom_Asig_Var,Dom);
-    
+std::vector<std::vector<int>> SimulatedAnneling(float T,int iter_max,float factor){
+    std::vector<std::vector<int>> Dom_Asig_Var = Read_Var();
+    std::vector<std::vector<int>> Dom = Read_Dom();
+    std::vector<struct Restriccion> Rest = Read_Rest();
+    std::vector<int> FrecuenciasOrdenadas = Frec_Orde(Dom);
+    std::vector<std::vector<int>> sol_act = init_sol(FrecuenciasOrdenadas,Dom_Asig_Var,Dom);
     
    
     int iter = 0;
     
-    int eval_act = funcion_evaluacion(sol_act,Rest,FrecuenciasOrdenadas);
+    int eval_act = funcion_evaluacion(sol_act,Rest,FrecuenciasOrdenadas,Dom_Asig_Var);
     srand(time(0));
-    cout<<"Eval_inicial"<<eval_act<<endl;
-    
-    while (T != 0 && iter != iter_max)
+    std::cout<<"Eval_inicial: "<<eval_act<<std::endl;
+    std::cout<<"Factor de disminucion: "<<factor<<std::endl;
+    while (T != 0.0 && iter != iter_max)
     {
         bool newsol = false; 
-        vector<int> mov_antenas; //lista de indices de las antenas a revisar de forma aleatoria.
+        std::vector<int> mov_antenas; //lista de indices de las antenas a revisar de forma aleatoria.
         for(int o = 0; o<sol_act.size();o++){
             mov_antenas.push_back(o);
         }
         random_shuffle(mov_antenas.begin(),mov_antenas.end());
         for(int antena: mov_antenas){
             //revisar los movimientos de tal antena 
-            vector<int> ant_act = sol_act[antena];
+            std::vector<int> ant_act = sol_act[antena];
             std::vector<int>::iterator poin = find(ant_act.begin(), ant_act.end(), 1);
             int index_value = distance(ant_act.begin(),poin);
-            vector <int> spwas = posibles_cambios(antena,index_value,Dom_Asig_Var,Dom,FrecuenciasOrdenadas);
+            std::vector <int> spwas = posibles_cambios(antena,index_value,Dom_Asig_Var,Dom,FrecuenciasOrdenadas);
             
             random_shuffle(spwas.begin(),spwas.end());
 
             for(int index_posible: spwas){ // revisar el candidado de frecuencia
                 
-                vector<vector<int>> nueva_sol = sol_act;
+                std::vector<std::vector<int>> nueva_sol = sol_act;
                 nueva_sol[antena][index_value] = 0;
                 nueva_sol[antena][index_posible] = 1;
 
-                int nueva_sol_value = funcion_evaluacion(nueva_sol,Rest,FrecuenciasOrdenadas);
+                int nueva_sol_value = funcion_evaluacion(nueva_sol,Rest,FrecuenciasOrdenadas,Dom_Asig_Var);
 
                 int variation = eval_act - nueva_sol_value; //actual - nueva porque estamos minizando.
                 float random01 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -289,15 +300,15 @@ vector<vector<int>> SimulatedAnneling(int T,int iter_max,float factor){
             }
         }
         if(newsol == false){
-            cout<<"Temperatura"<<T<<endl;
-            cout<<"Iteracion"<<iter<<endl;
-            cout<<"EvalFinal"<<eval_act<<endl;
+            std::cout<<"Temperatura: "<<T<<std::endl;
+            std::cout<<"Iteracion: "<<iter<<std::endl;
+            std::cout<<"EvalFinal: "<<eval_act<<std::endl;
             return sol_act;
         }
     }
-    cout<<"Temperatura"<<T<<endl;
-    cout<<"Iteracion"<<iter<<endl;
-    cout<<"EvalFinal"<<eval_act<<endl;
+    std::cout<<"Temperatura: "<<T<<std::endl;
+    std::cout<<"Iteracion: "<<iter<<std::endl;
+    std::cout<<"EvalFinal: "<<eval_act<<std::endl;
     return sol_act; 
 }
 
@@ -306,17 +317,17 @@ vector<vector<int>> SimulatedAnneling(int T,int iter_max,float factor){
 
 
 int main(){
-    int Temperatura;
+    float Temperatura;
     int IteracionesMax; 
     float FactorReduccion;
-    cout<<"Ingrese Temperatura inicial: ";
-    cin>>Temperatura;
-    cout<<"Ingrese cantidad maxima de iteraciones: ";
-    cin>>IteracionesMax;
-    cout<<"Ingrese factor de disminucion de la temperatura: ";
-    cin>>FactorReduccion;
+    std::cout<<"Ingrese Temperatura inicial: ";
+    std::cin>>Temperatura;
+    std::cout<<"Ingrese cantidad maxima de iteraciones: ";
+    std::cin>>IteracionesMax;
+    std::cout<<"Ingrese factor de disminucion de la temperatura: ";
+    std::cin>>FactorReduccion;
 
-    vector<vector<int>> resultado = SimulatedAnneling(Temperatura,IteracionesMax,FactorReduccion);
+    std::vector<std::vector<int>> resultado = SimulatedAnneling(Temperatura,IteracionesMax,FactorReduccion);
     // cout<<"------------------------------------------------------------------------------------"<<endl;
     // for(vector<int> line: resultado){
     //     cout<<"[";

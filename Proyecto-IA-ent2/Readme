@@ -1,8 +1,6 @@
 Nombre: Sebastian Araya
 Rol: 201673064-8    
 
-Para ejecutar el proyecto primero se debe ingresar la ruta donde se encuentra los archivos, DOM.TXT, CTR.TXT Y VAR.TXT
-en dentro del archvio main.cpp en las lineas 20, 41 y 79 respectivamente.
 
 Consideraciones: 
     - CTR.txt: las restrcciones leen archivos que tengan las lineas de la siguiente forma "1 199 C >  42", en otras palabras, solo 5 elementos por linea.
