@@ -126,20 +126,14 @@ vector<vector<int>> init_sol(vector<int> FrecuenciasOrdenadas,vector<vector<int>
         Frec_Asignada[n_antena][indexFrec1] = 1;
     }
 
-    cout<<"[";
-    for(int elem: FrecuenciasOrdenadas){
-        cout<< elem<< " ";
-    }
-    cout<<"]"<<endl;
 
-
-    for(vector<int> line: Frec_Asignada){
-        cout<<"[";
-        for(int i: line){
-            cout<<i<<" ";
-        }
-        cout<<"]"<<endl;
-    }
+    // for(vector<int> line: Frec_Asignada){
+    //     cout<<"[";
+    //     for(int i: line){
+    //         cout<<i<<" ";
+    //     }
+    //     cout<<"]"<<endl;
+    // }
 
     return Frec_Asignada;
 }
@@ -232,33 +226,34 @@ vector<vector<int>> SimulatedAnneling(){
     vector<vector<int>> sol_act = init_sol(FrecuenciasOrdenadas,Dom_Asig_Var,Dom);
     
     float T = 100.0;
-    int iter_max = 100; 
+    int iter_max = 500; 
     
    
     int iter = 0;
     
     int eval_act = funcion_evaluacion(sol_act,Rest,FrecuenciasOrdenadas);
+    srand(time(0));
+    cout<<"Eval_inicial"<<eval_act<<endl;
     
     while (T != 0 && iter != iter_max)
     {
         bool newsol = false; 
-        srand(time(0));
         vector<int> mov_antenas; //lista de indices de las antenas a revisar de forma aleatoria.
-        for(int o = 0; 0<sol_act.size();o++){
+        for(int o = 0; o<sol_act.size();o++){
             mov_antenas.push_back(o);
         }
         random_shuffle(mov_antenas.begin(),mov_antenas.end());
-
         for(int antena: mov_antenas){
             //revisar los movimientos de tal antena 
             vector<int> ant_act = sol_act[antena];
             std::vector<int>::iterator poin = find(ant_act.begin(), ant_act.end(), 1);
             int index_value = distance(ant_act.begin(),poin);
-
             vector <int> spwas = posibles_cambios(antena,index_value,Dom_Asig_Var,Dom,FrecuenciasOrdenadas);
             
             random_shuffle(spwas.begin(),spwas.end());
+
             for(int index_posible: spwas){ // revisar el candidado de frecuencia
+                
                 vector<vector<int>> nueva_sol = sol_act;
                 nueva_sol[antena][index_value] = 0;
                 nueva_sol[antena][index_posible] = 1;
@@ -287,9 +282,15 @@ vector<vector<int>> SimulatedAnneling(){
             }
         }
         if(newsol == false){
+            cout<<"Temperatura"<<T<<endl;
+            cout<<"Iteracion"<<iter<<endl;
+            cout<<"EvalFinal"<<eval_act<<endl;
             return sol_act;
         }
     }
+    cout<<"Temperatura"<<T<<endl;
+    cout<<"Iteracion"<<iter<<endl;
+    cout<<"EvalFinal"<<eval_act<<endl;
     return sol_act; 
 }
 
@@ -299,12 +300,12 @@ vector<vector<int>> SimulatedAnneling(){
 
 int main(){
     vector<vector<int>> resultado = SimulatedAnneling();
-    cout<<"------------------------------------------------------------------------------------"<<endl;
-    for(vector<int> line: resultado){
-        cout<<"[";
-        for(int i: line){
-            cout<<i<<" ";
-        }
-        cout<<"]"<<endl;
-    }
+    // cout<<"------------------------------------------------------------------------------------"<<endl;
+    // for(vector<int> line: resultado){
+    //     cout<<"[";
+    //     for(int i: line){
+    //         cout<<i<<" ";
+    //     }
+    //     cout<<"]"<<endl;
+    // }
 }
