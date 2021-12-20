@@ -1,0 +1,4 @@
+Eval_inicial3744
+Temperatura1.32207e-21
+Iteracion500
+EvalFinal2832

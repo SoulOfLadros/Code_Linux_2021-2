@@ -20,7 +20,10 @@ struct Restriccion
 
 vector<vector <int>> Read_Var(){ // Las variables son guardas en un vector de vectores, donde hay 2 elementos, uno de ellos es la variable y el otro el dominio asignado
     ifstream inFile;
-    inFile.open("/home/ladros/Programs/Proyecto-IA-ent2/CELAR/scen01/VAR.TXT"); // se debe especificar la ruta de Var.txt
+    string nameFile;
+    cout<< "Ingrese Nombre del archivo de variables (ejemplo VAR1.TXT): ";
+    cin>>nameFile;
+    inFile.open(nameFile); // se debe especificar la ruta de Var.txt
     int vari,dom;
     if (!inFile)
     {
@@ -41,7 +44,10 @@ vector<vector <int>> Read_Var(){ // Las variables son guardas en un vector de ve
 
 vector<vector<int>> Read_Dom(){ //El dominio se guarda en una lista donde cada indice es el dominio al que corresponde y los elementos son un vector con las posibles frecuencias
     ifstream inFil;
-    inFil.open("/home/ladros/Programs/Proyecto-IA-ent2/CELAR/scen01/DOM.TXT"); // se debe especificar la ruta de Dom.txt
+    string nameFile;
+    cout<< "Ingrese Nombre del archivo de dominio (ejemplo DOM1.TXT): ";
+    cin>>nameFile;
+    inFil.open(nameFile); // se debe especificar la ruta de Dom.txt
 
     if (!inFil)
     {
@@ -79,7 +85,10 @@ vector<vector<int>> Read_Dom(){ //El dominio se guarda en una lista donde cada i
 
 vector<struct Restriccion> Read_Rest(){
     ifstream inDat;
-    inDat.open("/home/ladros/Programs/Proyecto-IA-ent2/CELAR/scen01/CTR.TXT"); // se debe especificar la ruta de CTR.txt
+    string nameFile;
+    cout<< "Ingrese Nombre del archivo de restricciones (ejemplo CTR1.TXT): ";
+    cin>>nameFile;
+    inDat.open(nameFile); // se debe especificar la ruta de CTR.txt
     if (!inDat)
     {
         cout << "Fallo abrir archivo"<<endl;
@@ -218,15 +227,13 @@ vector<int> posibles_cambios(int index_antena,int index_frecAsig,vector<vector<i
     return index_cambios;
 }
 
-vector<vector<int>> SimulatedAnneling(){
+vector<vector<int>> SimulatedAnneling(int T,int iter_max,float factor){
     vector<vector<int>> Dom_Asig_Var = Read_Var();
     vector<vector<int>> Dom = Read_Dom();
     vector<struct Restriccion> Rest = Read_Rest();
     vector<int> FrecuenciasOrdenadas = Frec_Orde(Dom);
     vector<vector<int>> sol_act = init_sol(FrecuenciasOrdenadas,Dom_Asig_Var,Dom);
     
-    float T = 100.0;
-    int iter_max = 500; 
     
    
     int iter = 0;
@@ -276,7 +283,7 @@ vector<vector<int>> SimulatedAnneling(){
                 }
             }
             if(newsol == true){
-                T=T*0.9;
+                T=T*factor;
                 iter= iter +1 ;
                 break;
             }
@@ -299,7 +306,17 @@ vector<vector<int>> SimulatedAnneling(){
 
 
 int main(){
-    vector<vector<int>> resultado = SimulatedAnneling();
+    int Temperatura;
+    int IteracionesMax; 
+    float FactorReduccion;
+    cout<<"Ingrese Temperatura inicial: ";
+    cin>>Temperatura;
+    cout<<"Ingrese cantidad maxima de iteraciones: ";
+    cin>>IteracionesMax;
+    cout<<"Ingrese factor de disminucion de la temperatura: ";
+    cin>>FactorReduccion;
+
+    vector<vector<int>> resultado = SimulatedAnneling(Temperatura,IteracionesMax,FactorReduccion);
     // cout<<"------------------------------------------------------------------------------------"<<endl;
     // for(vector<int> line: resultado){
     //     cout<<"[";
