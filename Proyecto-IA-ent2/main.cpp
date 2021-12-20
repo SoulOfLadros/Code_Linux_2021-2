@@ -3,6 +3,9 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+#include<time.h>
+#include <cmath>
+
 using namespace std; 
 
 struct Restriccion
@@ -103,47 +106,41 @@ vector<struct Restriccion> Read_Rest(){
     inDat.close();
     return Rest;  
 }
-
-bool asignable(int var, int value_frec,vector<vector<int>> Dom_Asig_Var,vector<vector<int>> Dom ){
-
-    int Dom_asig = Dom_Asig_Var[var][1];
-
-    for (int frec_dom: Dom[Dom_asig])
-    {
-        if (frec_dom == value_frec)  return true;
-    }
-    return false;
-}   
+   
 
 vector<vector<int>> init_sol(vector<int> FrecuenciasOrdenadas,vector<vector<int>> Dom_Asig_Var,vector<vector<int>> Dom){
     int cant_Frecuencias = FrecuenciasOrdenadas.size();
     int cant_Variables = Dom_Asig_Var.size();
     
     vector<vector<int>> Frec_Asignada(cant_Variables,vector<int> (cant_Frecuencias,0)); //Matriz que ve si la frecuencia fue asignada a cierta antena. [#antenas][#frec]
+    
+    srand(time(0));
 
+    for(int n_antena = 0; n_antena < cant_Variables; n_antena++){
+        int dom_index_var = Dom_Asig_Var[n_antena][1];
+        int eleccion = rand() % Dom[dom_index_var].size(); 
 
-    int value_frec_act;
-    bool put_1 = false;
+        std::vector<int>::iterator lugar = find(Dom[dom_index_var].begin(), Dom[dom_index_var].end(), Dom[dom_index_var][eleccion]);
+        int indexFrec1 = distance(Dom[dom_index_var].begin(),lugar);
 
-    for (int var_act = 0; var_act < cant_Variables; var_act++)
-    {
-        for (int j = 0; j < cant_Frecuencias; j++)
-        {   
-            value_frec_act = FrecuenciasOrdenadas[j];
-            if (asignable(var_act,value_frec_act,Dom_Asig_Var,Dom)==true)
-            {
-                if (put_1 == false)
-                {
-                    Frec_Asignada[var_act][j] = 1;
-                    put_1 = true;
-                }
-                   
-            }
-            
-        }
-        put_1 = false;  
-        
+        Frec_Asignada[n_antena][indexFrec1] = 1;
     }
+
+    cout<<"[";
+    for(int elem: FrecuenciasOrdenadas){
+        cout<< elem<< " ";
+    }
+    cout<<"]"<<endl;
+
+
+    for(vector<int> line: Frec_Asignada){
+        cout<<"[";
+        for(int i: line){
+            cout<<i<<" ";
+        }
+        cout<<"]"<<endl;
+    }
+
     return Frec_Asignada;
 }
 
@@ -208,18 +205,106 @@ int funcion_evaluacion(vector<vector<int>> matriz, vector<struct Restriccion> Re
     return final;
 }
 
-int SimulatedAnneling(vector<vector<int>> Sol_Inicial){
-    int Temp_init = 100; //dejamos temperatura inicial 100 
-    int IterMax = 100;
+
+vector<int> posibles_cambios(int index_antena,int index_frecAsig,vector<vector<int>> Dom_Asig_Var,vector<vector<int>> Dom ,vector<int> FrecuenciasOrdenadas){
+
+    vector<int> asignacion = Dom[Dom_Asig_Var[index_antena][1]];
+
+    vector<int> index_cambios; 
+    for(int values: asignacion){
+        std::vector<int>::iterator pon = find(FrecuenciasOrdenadas.begin(), FrecuenciasOrdenadas.end(), values);
+        int index_value = distance(FrecuenciasOrdenadas.begin(),pon);
+        if(index_frecAsig == index_value) continue;
+        else
+        {
+            index_cambios.push_back(index_value);
+        }
+        
+    }
+    return index_cambios;
 }
 
-int main(){
-    
+vector<vector<int>> SimulatedAnneling(){
     vector<vector<int>> Dom_Asig_Var = Read_Var();
     vector<vector<int>> Dom = Read_Dom();
     vector<struct Restriccion> Rest = Read_Rest();
     vector<int> FrecuenciasOrdenadas = Frec_Orde(Dom);
-    vector<vector<int>> sol_inicial = init_sol(FrecuenciasOrdenadas,Dom_Asig_Var,Dom);
-    cout<<funcion_evaluacion(sol_inicial,Rest,FrecuenciasOrdenadas)<<endl;
-    return 0;
+    vector<vector<int>> sol_act = init_sol(FrecuenciasOrdenadas,Dom_Asig_Var,Dom);
+    
+    float T = 100.0;
+    int iter_max = 100; 
+    
+   
+    int iter = 0;
+    
+    int eval_act = funcion_evaluacion(sol_act,Rest,FrecuenciasOrdenadas);
+    
+    while (T != 0 && iter != iter_max)
+    {
+        bool newsol = false; 
+        srand(time(0));
+        vector<int> mov_antenas; //lista de indices de las antenas a revisar de forma aleatoria.
+        for(int o = 0; 0<sol_act.size();o++){
+            mov_antenas.push_back(o);
+        }
+        random_shuffle(mov_antenas.begin(),mov_antenas.end());
+
+        for(int antena: mov_antenas){
+            //revisar los movimientos de tal antena 
+            vector<int> ant_act = sol_act[antena];
+            std::vector<int>::iterator poin = find(ant_act.begin(), ant_act.end(), 1);
+            int index_value = distance(ant_act.begin(),poin);
+
+            vector <int> spwas = posibles_cambios(antena,index_value,Dom_Asig_Var,Dom,FrecuenciasOrdenadas);
+            
+            random_shuffle(spwas.begin(),spwas.end());
+            for(int index_posible: spwas){ // revisar el candidado de frecuencia
+                vector<vector<int>> nueva_sol = sol_act;
+                nueva_sol[antena][index_value] = 0;
+                nueva_sol[antena][index_posible] = 1;
+
+                int nueva_sol_value = funcion_evaluacion(nueva_sol,Rest,FrecuenciasOrdenadas);
+
+                int variation = eval_act - nueva_sol_value; //actual - nueva porque estamos minizando.
+                float random01 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+                if(variation > 0){
+                    sol_act = nueva_sol;
+                    eval_act = nueva_sol_value;
+                    newsol = true;
+                    break;
+                } else if ( exp(variation/T) > random01)
+                {
+                    sol_act = nueva_sol;
+                    eval_act = nueva_sol_value;
+                    newsol = true;
+                    break;
+                }
+            }
+            if(newsol == true){
+                T=T*0.9;
+                iter= iter +1 ;
+                break;
+            }
+        }
+        if(newsol == false){
+            return sol_act;
+        }
+    }
+    return sol_act; 
+}
+
+
+
+
+
+int main(){
+    vector<vector<int>> resultado = SimulatedAnneling();
+    cout<<"------------------------------------------------------------------------------------"<<endl;
+    for(vector<int> line: resultado){
+        cout<<"[";
+        for(int i: line){
+            cout<<i<<" ";
+        }
+        cout<<"]"<<endl;
+    }
 }
