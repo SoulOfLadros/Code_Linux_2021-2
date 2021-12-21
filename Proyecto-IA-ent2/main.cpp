@@ -243,9 +243,11 @@ std::vector<std::vector<int>> SimulatedAnneling(float T,int iter_max,float facto
     std::vector<std::vector<int>> Dom_Asig_Var = Read_Var();
     std::vector<std::vector<int>> Dom = Read_Dom();
     std::vector<struct Restriccion> Rest = Read_Rest();
+    time_t start, end;
+    time(&start);
     std::vector<int> FrecuenciasOrdenadas = Frec_Orde(Dom);
     std::vector<std::vector<int>> sol_act = init_sol(FrecuenciasOrdenadas,Dom_Asig_Var,Dom);
-    
+   
    
     int iter = 0;
     
@@ -253,7 +255,7 @@ std::vector<std::vector<int>> SimulatedAnneling(float T,int iter_max,float facto
     srand(time(0));
     std::cout<<"Eval_inicial: "<<eval_act<<std::endl;
     std::cout<<"Factor de disminucion: "<<factor<<std::endl;
-    while (T != 0.0 && iter != iter_max)
+    while (T > 0.00000001 && iter != iter_max)
     {
         bool newsol = false; 
         std::vector<int> mov_antenas; //lista de indices de las antenas a revisar de forma aleatoria.
@@ -303,12 +305,22 @@ std::vector<std::vector<int>> SimulatedAnneling(float T,int iter_max,float facto
             std::cout<<"Temperatura: "<<T<<std::endl;
             std::cout<<"Iteracion: "<<iter<<std::endl;
             std::cout<<"EvalFinal: "<<eval_act<<std::endl;
+
+            time(&end);
+            double time_taken = double(end - start);
+            std::cout << "Time taken by program is : "<<time_taken<<std::endl;
+
             return sol_act;
         }
     }
     std::cout<<"Temperatura: "<<T<<std::endl;
     std::cout<<"Iteracion: "<<iter<<std::endl;
     std::cout<<"EvalFinal: "<<eval_act<<std::endl;
+
+    time(&end);
+    double time_taken = double(end - start);
+    std::cout << "Time taken by program is : "<<time_taken<<std::endl;
+
     return sol_act; 
 }
 
@@ -327,7 +339,12 @@ int main(){
     std::cout<<"Ingrese factor de disminucion de la temperatura: ";
     std::cin>>FactorReduccion;
 
+
+
     std::vector<std::vector<int>> resultado = SimulatedAnneling(Temperatura,IteracionesMax,FactorReduccion);
+
+    
+
     // cout<<"------------------------------------------------------------------------------------"<<endl;
     // for(vector<int> line: resultado){
     //     cout<<"[";
