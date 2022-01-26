@@ -1,0 +1,34 @@
+org: sebastian97
+app: python-test
+service: python-test
+
+frameworkVersion: '2 || 3'
+
+
+provider:
+  name: aws
+  runtime: python3.8
+  lambdaHashingVersion: 20201221
+
+functions:
+  llamada:
+    handler: handler.llamada
+    events:
+      - http:
+          path: /
+          method: GET 
+
+plugins:
+  - serverless-s3-local
+  - serverless-offline
+custom:
+  s3:
+    host: localhost
+    directory: /tmp
+
+resources:
+  Resources:
+    NewResource:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: local-bucket
